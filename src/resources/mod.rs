@@ -5,6 +5,7 @@
 //! [`crate::types`].
 
 pub(crate) mod _base;
+mod iterate;
 
 pub mod alert_rules;
 pub mod api_keys;
