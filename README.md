@@ -2,6 +2,8 @@
 
 Official Rust client for [Hivehook](https://hivehook.com), webhook infrastructure for modern teams (inbound and outbound).
 
+Latest release: **0.1.1** on [crates.io](https://crates.io/crates/hivehook).
+
 ## Install
 
 ```toml
