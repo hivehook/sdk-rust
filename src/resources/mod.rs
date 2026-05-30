@@ -19,6 +19,7 @@ pub mod endpoints;
 pub mod event_type_schemas;
 pub mod events;
 pub mod messages;
+pub mod meta_event_configs;
 pub mod organizations;
 pub mod outbound_deliveries;
 pub mod outbound_dlq;

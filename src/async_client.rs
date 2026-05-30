@@ -209,4 +209,9 @@ impl AsyncHivehookClient {
     pub fn audit_logs(&self) -> audit_logs::AsyncAuditLogService<'_> {
         audit_logs::AsyncAuditLogService { transport: &self.transport }
     }
+
+    /// Async meta-event webhook configuration service.
+    pub fn meta_event_configs(&self) -> meta_event_configs::AsyncMetaEventConfigService<'_> {
+        meta_event_configs::AsyncMetaEventConfigService { transport: &self.transport }
+    }
 }

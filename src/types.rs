@@ -1226,3 +1226,58 @@ pub struct StreamSink {
     #[serde(default)]
     pub created_at: String,
 }
+
+/// A single message persisted in a Stream's log.
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StreamEntry {
+    /// Entry identifier.
+    #[serde(default)]
+    pub id: String,
+    /// Owning stream.
+    #[serde(default)]
+    pub stream_id: String,
+    /// Monotonically increasing position in the stream.
+    #[serde(default)]
+    pub sequence: i64,
+    /// Source Message ID, when the entry originated from a published Message.
+    #[serde(default)]
+    pub message_id: Option<String>,
+    /// Event type carried by the entry.
+    #[serde(default)]
+    pub event_type: String,
+    /// Base64-encoded payload.
+    #[serde(default)]
+    pub payload: String,
+    /// Creation timestamp.
+    #[serde(default)]
+    pub created_at: String,
+}
+
+/// A meta-event webhook configuration: forwards events about events
+/// (delivery.failed, source.created, etc.) to an external receiver.
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MetaEventConfig {
+    /// Config identifier.
+    #[serde(default)]
+    pub id: String,
+    /// Human-readable name.
+    #[serde(default)]
+    pub name: String,
+    /// Receiver URL.
+    #[serde(default)]
+    pub url: String,
+    /// HMAC signing secret returned by the server.
+    #[serde(default)]
+    pub signing_secret: String,
+    /// Meta-event types this config subscribes to.
+    #[serde(default)]
+    pub event_types: Vec<String>,
+    /// Whether the config is currently active.
+    #[serde(default)]
+    pub enabled: bool,
+    /// Creation timestamp.
+    #[serde(default)]
+    pub created_at: String,
+}

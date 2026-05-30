@@ -4,11 +4,27 @@ use crate::errors::HivehookError;
 use crate::resources::_base::{put_opt, vars};
 #[cfg(feature = "blocking")]
 use crate::transport::BlockingGraphQLTransport;
-use crate::types::{ListResult, Stream};
+use crate::types::{ListResult, Stream, StreamEntry};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 const FRAGMENT: &str = "id applicationId name status retentionDays createdAt";
+
+const ENTRY_FRAGMENT: &str = "id streamId sequence messageId eventType payload createdAt";
+
+/// Options for [`StreamService::entries`].
+#[non_exhaustive]
+#[derive(Debug, Default, Clone)]
+pub struct ListStreamEntriesOptions {
+    pub after_sequence: Option<i64>,
+    pub limit: Option<i32>,
+}
+
+#[derive(Deserialize)]
+struct EntriesData {
+    #[serde(rename = "streamEntries")]
+    stream_entries: ListResult<StreamEntry>,
+}
 
 /// Options for [`StreamService::list`].
 #[non_exhaustive]
@@ -162,6 +178,28 @@ impl<'a> StreamService<'a> {
             .execute("mutation($id: UUID!) { deleteStream(id: $id) }", Some(v))?;
         Ok(data.delete_stream)
     }
+
+    /// List persisted entries from a stream.
+    pub fn entries(
+        &self,
+        stream_id: &str,
+        options: ListStreamEntriesOptions,
+    ) -> Result<ListResult<StreamEntry>, HivehookError> {
+        let query = format!(
+            r#"query($streamId: UUID!, $afterSequence: Int, $limit: Int) {{
+                streamEntries(streamId: $streamId, afterSequence: $afterSequence, limit: $limit) {{
+                    nodes {{ {ENTRY_FRAGMENT} }}
+                    pageInfo {{ total limit offset endCursor hasNextPage }}
+                }}
+            }}"#
+        );
+        let mut v = vars();
+        v.insert("streamId".into(), Value::String(stream_id.into()));
+        put_opt(&mut v, "afterSequence", options.after_sequence);
+        put_opt(&mut v, "limit", options.limit);
+        let data: EntriesData = self.transport.execute(&query, Some(v))?;
+        Ok(data.stream_entries)
+    }
 }
 
 /// Async variant of the stream service.
@@ -243,5 +281,27 @@ impl<'a> AsyncStreamService<'a> {
             .execute("mutation($id: UUID!) { deleteStream(id: $id) }", Some(v))
             .await?;
         Ok(data.delete_stream)
+    }
+
+    /// List persisted entries from a stream.
+    pub async fn entries(
+        &self,
+        stream_id: &str,
+        options: ListStreamEntriesOptions,
+    ) -> Result<ListResult<StreamEntry>, HivehookError> {
+        let query = format!(
+            r#"query($streamId: UUID!, $afterSequence: Int, $limit: Int) {{
+                streamEntries(streamId: $streamId, afterSequence: $afterSequence, limit: $limit) {{
+                    nodes {{ {ENTRY_FRAGMENT} }}
+                    pageInfo {{ total limit offset endCursor hasNextPage }}
+                }}
+            }}"#
+        );
+        let mut v = vars();
+        v.insert("streamId".into(), Value::String(stream_id.into()));
+        put_opt(&mut v, "afterSequence", options.after_sequence);
+        put_opt(&mut v, "limit", options.limit);
+        let data: EntriesData = self.transport.execute(&query, Some(v)).await?;
+        Ok(data.stream_entries)
     }
 }

@@ -202,4 +202,9 @@ impl HivehookClient {
     pub fn audit_logs(&self) -> audit_logs::AuditLogService<'_> {
         audit_logs::AuditLogService { transport: &self.transport }
     }
+
+    /// Meta-event webhook configuration service.
+    pub fn meta_event_configs(&self) -> meta_event_configs::MetaEventConfigService<'_> {
+        meta_event_configs::MetaEventConfigService { transport: &self.transport }
+    }
 }
